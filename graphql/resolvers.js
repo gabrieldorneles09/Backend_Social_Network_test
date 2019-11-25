@@ -1,5 +1,6 @@
 const posts = [];
 const uuid = require("uuid/v1");
+const storage = require("../storage");
 
 const resolvers = {
   Query: {
@@ -8,12 +9,15 @@ const resolvers = {
     }
   },
   Mutation: {
-    addPost(parent, { post }) {
-      const { description } = post;
+    async addPost(parent, { post }) {
+      const { picture, description } = post;
+      const { mimetype, createReadStream } = await picture;
+
+      const { path } = await storage.upload(createReadStream(), mimetype);
 
       const newPost = {
         id: uuid(),
-        picture: "/path",
+        picture: path,
         description,
         createdAt: new Date().toISOString(),
         claps: 0
